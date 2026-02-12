@@ -1,36 +1,18 @@
-import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 
-function Header({ onSearch, onClear }) {
-  const [searchQuery, setSearchQuery] = useState("");
+export default function Header({ onSearch, onClear }) {
   const location = useLocation();
+  const [query, setQuery] = useState("");
 
-  
-  useEffect(() => {
-    const trimmed = searchQuery.trim();
-
-    // Empty -> reset to popular
-    if (!trimmed) {
-      onClear?.();
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      onSearch?.(trimmed);
-    }, 450);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, onSearch, onClear]);
-
-  const runSearch = () => onSearch?.(searchQuery.trim());
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") runSearch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (onSearch) onSearch(query);
   };
 
   const handleClear = () => {
-    setSearchQuery("");
-    onClear?.();
+    setQuery("");
+    if (onClear) onClear();
   };
 
   return (
@@ -40,6 +22,20 @@ function Header({ onSearch, onClear }) {
           MovieShelf
         </Link>
 
+        {onSearch && (
+          <form className="search-container" onSubmit={handleSubmit}>
+            <input
+              className="search-input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search movies..."
+            />
+            <button className="search-button" type="submit">
+              Search
+            </button>
+          </form>
+        )}
+
         <nav className="nav-links">
           <Link
             to="/"
@@ -48,33 +44,26 @@ function Header({ onSearch, onClear }) {
           >
             Home
           </Link>
+
           <Link
             to="/favorites"
-            className={`nav-link ${location.pathname === "/favorites" ? "active" : ""}`}
+            className={`nav-link ${
+              location.pathname === "/favorites" ? "active" : ""
+            }`}
           >
             Favorites
           </Link>
-        </nav>
 
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search movies..."
-            className="search-input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button className="search-button" onClick={runSearch}>
-            Search
-          </button>
-          <button className="search-button" onClick={handleClear} type="button">
-            Clear
-          </button>
-        </div>
+          <Link
+            to="/watchlist"
+            className={`nav-link ${
+              location.pathname === "/watchlist" ? "active" : ""
+            }`}
+          >
+            Watchlist
+          </Link>
+        </nav>
       </div>
     </header>
   );
 }
-
-export default Header;

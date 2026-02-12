@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import { isFavorite, toggleFavorite } from "../utils/favorites";
+//import { useMovies } from "../contexts/MovieProvider";
+import { useMovies } from "../contexts/useMovies";
 
-const IMAGE_BASE = import.meta.env.VITE_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w500";
 
-function MovieCard({ movie }) {
+const IMAGE_BASE =
+  import.meta.env.VITE_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w500";
+
+export default function MovieCard({ movie }) {
   const [fav, setFav] = useState(false);
+
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useMovies();
+  const inWatchlist = isInWatchlist(movie.id);
 
   useEffect(() => {
     setFav(isFavorite(movie.id));
@@ -17,6 +24,14 @@ function MovieCard({ movie }) {
   const handleToggleFavorite = () => {
     toggleFavorite(movie);
     setFav((prev) => !prev);
+  };
+
+  const handleToggleWatchlist = () => {
+    if (inWatchlist) {
+      removeFromWatchlist(movie.id);
+    } else {
+      addToWatchlist(movie);
+    }
   };
 
   return (
@@ -37,9 +52,14 @@ function MovieCard({ movie }) {
         >
           {fav ? "♥ Remove Favorite" : "♡ Add Favorite"}
         </button>
+
+        <button
+          className={`watchlist-button ${inWatchlist ? "added" : ""}`}
+          onClick={handleToggleWatchlist}
+        >
+          {inWatchlist ? "✓ Remove from Watchlist" : "+ Add to Watchlist"}
+        </button>
       </div>
     </div>
   );
 }
-
-export default MovieCard;
